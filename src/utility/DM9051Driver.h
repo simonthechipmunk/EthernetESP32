@@ -38,4 +38,22 @@ protected:
   virtual esp_eth_phy_t* newPHY();
 };
 
+class DM9051CallbackDriver : public DM9051Driver {
+public:
+
+  DM9051CallbackDriver()
+      : DM9051Driver(-1, -1, -1) {
+        SPIClass SPInull = NULL;
+        setSPI(SPInull);
+  }
+
+  void onRead(bool (*function)(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len));
+  void onWrite(bool (*function)(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len));
+
+private:
+
+  bool (*user_onRead)(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len);
+  bool (*user_onWrite)(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len);
+};
+
 #endif

@@ -70,3 +70,32 @@ bool DM9051Driver::write(uint32_t cmd, uint32_t addr, const void* data, uint32_t
   spi->endTransaction();
   return ESP_OK;
 }
+
+esp_eth_mac_t* DM9051CallbackDriver::newMAC() {
+
+  eth_dm9051_config_t mac_config;
+  mac_config.int_gpio_num = digitalPinToGPIONumber(pinIRQ);
+  mac_config.poll_period_ms = (pinIRQ < 0) ? 10 : 0;
+  initCustomSPI(mac_config.custom_spi_driver);
+
+  eth_mac_config_t eth_mac_config = ETH_MAC_DEFAULT_CONFIG();
+  return esp_eth_mac_new_dm9051(&mac_config, &eth_mac_config);
+}
+
+bool DM9051CallbackDriver::read(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len) {
+  
+  return user_onRead(cmd, addr, data, data_len);
+}
+
+bool DM9051CallbackDriver::write(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len) {
+  
+  return user_onWrite(cmd, addr, data, data_len);
+}
+
+void DM9051CallbackDriver::onRead(bool (*function)(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len)) {
+  user_onRead = function;
+}
+
+void DM9051CallbackDriver::onWrite(bool (*function)(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len)) {
+  user_onWrite = function;
+}
