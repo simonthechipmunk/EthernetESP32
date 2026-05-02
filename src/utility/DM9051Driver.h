@@ -43,15 +43,15 @@ public:
 
   DM9051CallbackDriver()
       : DM9051Driver(-1, -1, -1) {
-        SPIClass SPInull = NULL;
-        setSPI(SPInull);
   }
 
+  virtual bool read(uint32_t cmd, uint32_t addr, void *data, uint32_t data_len) override;
+  virtual bool write(uint32_t cmd, uint32_t addr, const void *data, uint32_t data_len) override;
   void onRead(bool (*function)(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len));
   void onWrite(bool (*function)(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len));
 
-private:
-
+protected:
+  esp_eth_mac_t* newMAC() override;
   bool (*user_onRead)(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len);
   bool (*user_onWrite)(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len);
 };
