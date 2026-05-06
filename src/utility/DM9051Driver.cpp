@@ -75,10 +75,11 @@ esp_eth_mac_t* DM9051CallbackDriver::newMAC() {
 
   eth_dm9051_config_t mac_config;
   mac_config.int_gpio_num = digitalPinToGPIONumber(pinIRQ);
-  mac_config.poll_period_ms = (pinIRQ < 0) ? 10 : 0;
+  mac_config.poll_period_ms = (pinIRQ < 0) ? 60 : 0;
   initCustomSPI(mac_config.custom_spi_driver);
 
   eth_mac_config_t eth_mac_config = ETH_MAC_DEFAULT_CONFIG();
+  eth_mac_config.sw_reset_timeout_ms = 300;
   return esp_eth_mac_new_dm9051(&mac_config, &eth_mac_config);
 }
 
