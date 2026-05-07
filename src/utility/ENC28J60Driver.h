@@ -39,4 +39,26 @@ protected:
 
 };
 
+class ENC28J60CallbackDriver : public ENC28J60Driver {
+public:
+
+  ENC28J60CallbackDriver(uint16_t poll_interval_ms = 60, uint32_t sw_reset_timeout_ms = 300)
+      : ENC28J60Driver(-1, -1, -1), poll_interval(poll_interval_ms > 0 ? poll_interval_ms : 60), sw_reset_timeout(sw_reset_timeout_ms > 0 ? sw_reset_timeout_ms : 300) {
+  }
+
+  virtual bool read(uint32_t cmd, uint32_t addr, void *data, uint32_t data_len) override;
+  virtual bool write(uint32_t cmd, uint32_t addr, const void *data, uint32_t data_len) override;
+  void onRead(bool (*function)(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len));
+  void onWrite(bool (*function)(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len));
+
+protected:
+  esp_eth_mac_t* newMAC() override;
+  bool (*user_onRead)(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len);
+  bool (*user_onWrite)(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len);
+
+private:
+  const uint16_t poll_interval;
+  const uint32_t sw_reset_timeout;
+};
+
 #endif

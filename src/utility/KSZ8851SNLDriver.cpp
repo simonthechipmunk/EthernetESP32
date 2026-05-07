@@ -78,3 +78,33 @@ bool KSZ8851SNLDriver::write(uint32_t cmd, uint32_t addr, const void* data, uint
   spi->endTransaction();
   return ESP_OK;
 }
+
+esp_eth_mac_t* KSZ8851SNLCallbackDriver::newMAC() {
+
+  eth_ksz8851snl_config_t mac_config;
+  mac_config.int_gpio_num = digitalPinToGPIONumber(pinIRQ);
+  mac_config.poll_period_ms = this->poll_interval;
+  initCustomSPI(mac_config.custom_spi_driver);
+
+  eth_mac_config_t eth_mac_config = ETH_MAC_DEFAULT_CONFIG();
+  eth_mac_config.sw_reset_timeout_ms = this->sw_reset_timeout;
+  return esp_eth_mac_new_ksz8851snl(&mac_config, &eth_mac_config);
+}
+
+bool KSZ8851SNLCallbackDriver::read(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len) {
+  
+  return user_onRead(cmd, addr, data, data_len);
+}
+
+bool KSZ8851SNLCallbackDriver::write(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len) {
+  
+  return user_onWrite(cmd, addr, data, data_len);
+}
+
+void KSZ8851SNLCallbackDriver::onRead(bool (*function)(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len)) {
+  user_onRead = function;
+}
+
+void KSZ8851SNLCallbackDriver::onWrite(bool (*function)(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len)) {
+  user_onWrite = function;
+}

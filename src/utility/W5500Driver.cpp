@@ -72,3 +72,33 @@ bool W5500Driver::write(uint32_t cmd, uint32_t addr, const void* data, uint32_t 
   spi->endTransaction();
   return ESP_OK;
 }
+
+esp_eth_mac_t* W5500CallbackDriver::newMAC() {
+
+  eth_w5500_config_t mac_config;
+  mac_config.int_gpio_num = digitalPinToGPIONumber(pinIRQ);
+  mac_config.poll_period_ms = this->poll_interval;
+  initCustomSPI(mac_config.custom_spi_driver);
+
+  eth_mac_config_t eth_mac_config = ETH_MAC_DEFAULT_CONFIG();
+  eth_mac_config.sw_reset_timeout_ms = this->sw_reset_timeout;
+  return esp_eth_mac_new_w5500(&mac_config, &eth_mac_config);
+}
+
+bool W5500CallbackDriver::read(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len) {
+  
+  return user_onRead(cmd, addr, data, data_len);
+}
+
+bool W5500CallbackDriver::write(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len) {
+  
+  return user_onWrite(cmd, addr, data, data_len);
+}
+
+void W5500CallbackDriver::onRead(bool (*function)(uint32_t cmd, uint32_t addr, void* data, uint32_t data_len)) {
+  user_onRead = function;
+}
+
+void W5500CallbackDriver::onWrite(bool (*function)(uint32_t cmd, uint32_t addr, const void* data, uint32_t data_len)) {
+  user_onWrite = function;
+}
